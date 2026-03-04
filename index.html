@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Futbol Algoritma Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Başlık -->
+    <header id="header">
+        <h1>⚽ Futbol Algoritma Oyunu</h1>
+        <p class="subtitle">Komutları sırayla yaz, topu kaleye götür ve GOL at! ⚽🎉</p>
+    </header>
+
+    <main id="app">
+        <!-- Sol Panel: Oyun Alanı -->
+        <section id="game-area">
+            <!-- Seviye Seçici & Bilgi -->
+            <div id="level-bar">
+                <div id="level-selector">
+                    <label for="level-select">Seviye:</label>
+                    <select id="level-select"></select>
+                </div>
+                <div id="score-display">
+                    <span id="star-display">⭐⭐⭐</span>
+                    <span id="move-count">Komut: 0</span>
+                </div>
+            </div>
+
+            <!-- Oyun Grid'i -->
+            <div id="grid-container">
+                <div id="game-grid"></div>
+            </div>
+
+            <!-- Mesaj Alanı -->
+            <div id="message-box">
+                <span id="message-icon">💡</span>
+                <span id="message-text">Aşağıdan komutlar ekle ve "Çalıştır" butonuna bas! 🚀</span>
+            </div>
+        </section>
+
+        <!-- Sağ Panel: Komut Paneli -->
+        <section id="command-panel">
+            <h2>🎮 Komut Paneli</h2>
+
+            <!-- Komut Butonları -->
+            <div id="command-buttons">
+                <div class="cmd-group">
+                    <button class="cmd-btn cmd-ileri" id="btn-ileri" title="Topu ileri sür">
+                        <span class="cmd-icon">⬆️</span>
+                        <span class="cmd-label">İLERİ_SÜR</span>
+                    </button>
+                    <div class="cmd-param">
+                        <label for="ileri-input">Kaç kare:</label>
+                        <input type="number" id="ileri-input" min="1" max="7" value="1">
+                    </div>
+                </div>
+
+                <div class="cmd-group">
+                    <button class="cmd-btn cmd-calim" id="btn-calim" title="Sağa veya sola 1 kare git">
+                        <span class="cmd-icon">🔀</span>
+                        <span class="cmd-label">ÇALIM_AT</span>
+                    </button>
+                    <div class="cmd-param">
+                        <label for="calim-select">Yön:</label>
+                        <select id="calim-select">
+                            <option value="SAĞ">SAĞ ➡️</option>
+                            <option value="SOL">SOL ⬅️</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cmd-group">
+                    <button class="cmd-btn cmd-sut" id="btn-sut" title="Kalenin tam önünden şut çek!">
+                        <span class="cmd-icon">🥅</span>
+                        <span class="cmd-label">ŞUT_ÇEK</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Komut Listesi -->
+            <div id="command-list-area">
+                <h3>📝 Komut Sırası</h3>
+                <div id="command-list">
+                    <p class="empty-msg">Henüz komut eklenmedi...</p>
+                </div>
+            </div>
+
+            <!-- Kontrol Butonları -->
+            <div id="control-buttons">
+                <button id="btn-run" class="ctrl-btn run-btn" title="Komutları çalıştır">
+                    ▶️ Çalıştır
+                </button>
+                <button id="btn-reset" class="ctrl-btn reset-btn" title="Komutları sıfırla">
+                    🔄 Sıfırla
+                </button>
+                <button id="btn-clear" class="ctrl-btn clear-btn" title="Tüm komutları temizle">
+                    🗑️ Temizle
+                </button>
+            </div>
+
+            <!-- Sonuç / Analiz -->
+            <div id="result-box" class="hidden">
+                <h3>📊 Sonuç</h3>
+                <div id="result-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Gol Overlay -->
+    <div id="goal-overlay" class="hidden">
+        <div id="goal-content">
+            <div class="goal-text">⚽ GOOOL! ⚽</div>
+            <div id="goal-stars"></div>
+            <div id="goal-message"></div>
+            <button id="goal-next" class="ctrl-btn run-btn">Sonraki Seviye ➡️</button>
+            <button id="goal-close" class="ctrl-btn reset-btn">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Hata Overlay -->
+    <div id="error-overlay" class="hidden">
+        <div id="error-content">
+            <div class="error-text">😕 Hay aksi!</div>
+            <div id="error-message"></div>
+            <button id="error-close" class="ctrl-btn reset-btn">Tamam, tekrar deneyeceğim! 💪</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
