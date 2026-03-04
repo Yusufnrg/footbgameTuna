@@ -11,111 +11,109 @@
     // Her seviye: rows, cols, ballStart [row,col], goal [row,col],
     // defenders [[row,col], ...], optimalMoves (yıldız hesabı)
     // Top yukarıya (row azalan yön) hareket eder.
-    // Kale satır 0'da bulunur. ŞUT_ÇEK: top satır 1'de ve kaleyle aynı sütunda olmalı.
-    // ÇALIM_AT: sadece 1 kare sağa veya sola gider (ileri gitmez).
+    // Kale satır 0'da bulunur. ŞUT_ÇEK: en fazla 2 kare ileri gider.
+    // Top kaleyle aynı sütunda ve en fazla 2 satır aşağıda olmalı.
+    // ÇALIM_AT: önce 1 kare yana (sağ/sol), ardından 1 kare ileri (yukarı) gider.
     // İLERİ_SÜR(x): x kare yukarı (satır azaltır).
 
     const LEVELS = [
         {
             // Seviye 1: Düz ileri, engel yok
-            // ŞUT_ÇEK from start → ball flies [4,2]→[3,2]→[2,2]→[1,2]→[0,2] GOL → 1 komut
+            // Ball [4,2] → İLERİ_SÜR(2)→[2,2], ŞUT_ÇEK → GOL → 2 komut
             name: 'Seviye 1 – Isınma',
             description: 'Topu düz ileri götür ve kaleye şut çek! Hiç engel yok, kolay! 😊',
+            rows: 5,
+            cols: 5,
+            ballStart: [4, 2],
+            goal: [0, 2],
+            defenders: [],
+            optimalMoves: 2
+        },
+        {
+            // Seviye 2: Tek engel
+            // Ball [5,2] → ÇALIM_AT(SAĞ)→[5,3]→[4,3],
+            // İLERİ_SÜR(2)→[2,3], ÇALIM_AT(SOL)→[2,2]→[1,2],
+            // ŞUT_ÇEK → GOL → 4 komut
+            name: 'Seviye 2 – İlk Engel',
+            description: 'Önünde bir savunmacı var! Çalım at, etrafından dolan ve şut çek! 🏃',
             rows: 6,
             cols: 5,
             ballStart: [5, 2],
             goal: [0, 2],
-            defenders: [],
-            optimalMoves: 1
-        },
-        {
-            // Seviye 2: Tek engel
-            // Ball [6,2] → İLERİ_SÜR(2)→[4,2], ÇALIM_AT(SAĞ)→[4,3],
-            // İLERİ_SÜR(3)→[1,3], ÇALIM_AT(SOL)→[1,2], ŞUT_ÇEK → 5 komut
-            name: 'Seviye 2 – İlk Engel',
-            description: 'Önünde bir savunmacı var! Yana kaç, etrafından dolan ve şut çek! 🏃',
-            rows: 7,
-            cols: 5,
-            ballStart: [6, 2],
-            goal: [0, 2],
             defenders: [[3, 2]],
-            optimalMoves: 5
+            optimalMoves: 4
         },
         {
             // Seviye 3: İki engel
-            // Ball [7,3] → İLERİ_SÜR(2)→[5,3], ÇALIM_AT(SAĞ)→[5,4],
-            // İLERİ_SÜR(2)→[3,4], ÇALIM_AT(SOL)→[3,3],
-            // ŞUT_ÇEK → top [2,3]→[1,3]→[0,3] GOL! → 5 komut
+            // Ball [6,3] → ÇALIM_AT(SAĞ)→side[6,4]→fwd[5,4],
+            // İLERİ_SÜR(2)→[3,4], ÇALIM_AT(SOL)→side[3,3]→fwd[2,3],
+            // ŞUT_ÇEK → GOL → 4 komut
             name: 'Seviye 3 – Çift Engel',
             description: 'Bu sefer iki savunmacı var! İkisini de geçebilir misin? 💪',
-            rows: 8,
+            rows: 7,
             cols: 7,
-            ballStart: [7, 3],
+            ballStart: [6, 3],
             goal: [0, 3],
             defenders: [[4, 3], [2, 4]],
-            optimalMoves: 5
+            optimalMoves: 4
         },
         {
             // Seviye 4: Üç engel, koridor
-            // Ball [7,3] → İLERİ_SÜR(1)→[6,3], ÇALIM_AT(SAĞ)→[6,4],
-            // İLERİ_SÜR(3)→[3,4], ÇALIM_AT(SOL)→[3,3],
-            // ŞUT_ÇEK → top [2,3]→[1,3]→[0,3] GOL! → 5 komut
+            // Ball [6,3] → ÇALIM_AT(SAĞ)→[6,4]→[5,4],
+            // İLERİ_SÜR(2)→[3,4], ÇALIM_AT(SOL)→[3,3]→[2,3],
+            // ŞUT_ÇEK → GOL → 4 komut
             name: 'Seviye 4 – Dar Koridor',
             description: 'Savunmacılar arasında dar bir yol var. Dikkatli ilerle! 🤔',
+            rows: 7,
+            cols: 7,
+            ballStart: [6, 3],
+            goal: [0, 3],
+            defenders: [[4, 3], [4, 2], [3, 5]],
+            optimalMoves: 4
+        },
+        {
+            // Seviye 5: Zikzak
+            // Ball [7,3] → ÇALIM_AT(SAĞ)→[7,4]→[6,4],
+            // İLERİ_SÜR(2)→[4,4], ÇALIM_AT(SOL)→[4,3]→[3,3],
+            // İLERİ_SÜR(1)→[2,3], ŞUT_ÇEK → GOL → 5 komut
+            name: 'Seviye 5 – Zikzak',
+            description: 'Sağa sola zikzak yaparak savunmacıları geç! Gerçek bir dribling! ⚡',
             rows: 8,
             cols: 7,
             ballStart: [7, 3],
             goal: [0, 3],
-            defenders: [[5, 3], [3, 2], [2, 4]],
+            defenders: [[5, 3], [3, 4], [1, 2]],
             optimalMoves: 5
         },
         {
-            // Seviye 5: Zikzak — 3 engel
-            // Ball [8,3] → İLERİ_SÜR(1)→[7,3], ÇALIM_AT(SAĞ)→[7,4],
-            // İLERİ_SÜR(2)→[5,4], ÇALIM_AT(SOL)→[5,3],
-            // İLERİ_SÜR(2)→[3,3], ÇALIM_AT(SAĞ)→[3,4],
-            // İLERİ_SÜR(2)→[1,4], ÇALIM_AT(SOL)→[1,3],
-            // ŞUT_ÇEK → 9 komut
-            name: 'Seviye 5 – Zikzak',
-            description: 'Sağa sola zikzak yaparak savunmacıları geç! Gerçek bir dribling! ⚡',
-            rows: 9,
-            cols: 7,
-            ballStart: [8, 3],
-            goal: [0, 3],
-            defenders: [[6, 3], [4, 4], [2, 3]],
-            optimalMoves: 9
-        },
-        {
-            // Seviye 6: Duvar geçişi — 3'lü defans duvarı
-            // Ball [8,3] → İLERİ_SÜR(3)→[5,3], ÇALIM_AT(SAĞ)→[5,4],
-            // ÇALIM_AT(SAĞ)→[5,5], İLERİ_SÜR(2)→[3,5],
-            // ÇALIM_AT(SOL)→[3,4], ÇALIM_AT(SOL)→[3,3],
-            // ŞUT_ÇEK → top [2,3]→[1,3]→[0,3] GOL! → 7 komut
+            // Seviye 6: Duvar geçişi
+            // Ball [7,3] → ÇALIM_AT(SAĞ)→[7,4]→[6,4],
+            // ÇALIM_AT(SAĞ)→[6,5]→[5,5], İLERİ_SÜR(2)→[3,5],
+            // ÇALIM_AT(SOL)→[3,4]→[2,4], ÇALIM_AT(SOL)→[2,3]→[1,3],
+            // ŞUT_ÇEK → GOL → 6 komut
             name: 'Seviye 6 – Duvar Geçişi',
             description: 'Savunmacılar duvar gibi dizilmiş! Etrafından dolanabilir misin? 🧱',
+            rows: 8,
+            cols: 7,
+            ballStart: [7, 3],
+            goal: [0, 3],
+            defenders: [[4, 2], [4, 3], [4, 4], [1, 5]],
+            optimalMoves: 6
+        },
+        {
+            // Seviye 7: Uzman
+            // Ball [8,3] → ÇALIM_AT(SAĞ)→[8,4]→[7,4],
+            // İLERİ_SÜR(2)→[5,4], ÇALIM_AT(SOL)→[5,3]→[4,3],
+            // ÇALIM_AT(SOL)→[4,2]→[3,2], İLERİ_SÜR(1)→[2,2],
+            // ÇALIM_AT(SAĞ)→[2,3]→[1,3], ŞUT_ÇEK → GOL → 7 komut
+            name: 'Seviye 7 – Uzman',
+            description: 'En zor seviye! En kısa yolu bulabilir misin? Sen bir şampiyonsun! 🏆',
             rows: 9,
             cols: 7,
             ballStart: [8, 3],
             goal: [0, 3],
-            defenders: [[4, 2], [4, 3], [4, 4], [2, 2], [2, 5]],
+            defenders: [[6, 3], [6, 2], [4, 4], [3, 3], [1, 4]],
             optimalMoves: 7
-        },
-        {
-            // Seviye 7: Uzman — çok engel
-            // Defenders: [6,3], [6,2], [4,4], [3,3], [2,4]
-            // Ball [9,3] → İLERİ_SÜR(2)→[7,3], ÇALIM_AT(SAĞ)→[7,4],
-            // İLERİ_SÜR(2)→[5,4], ÇALIM_AT(SOL)→[5,3],
-            // İLERİ_SÜR(1)→[4,3], ÇALIM_AT(SOL)→[4,2],
-            // İLERİ_SÜR(2)→[2,2], ÇALIM_AT(SAĞ)→[2,3],
-            // ŞUT_ÇEK → top [1,3]→[0,3] GOL! → 9 komut
-            name: 'Seviye 7 – Uzman',
-            description: 'En zor seviye! En kısa yolu bulabilir misin? Sen bir şampiyonsun! 🏆',
-            rows: 10,
-            cols: 7,
-            ballStart: [9, 3],
-            goal: [0, 3],
-            defenders: [[6, 3], [6, 2], [4, 4], [3, 3], [2, 4]],
-            optimalMoves: 9
         }
     ];
 
@@ -137,6 +135,10 @@
     // ───────────────────────────────────────────────
 
     const dom = {
+        instructionsOverlay: document.getElementById('instructions-overlay'),
+        btnUnderstood: document.getElementById('btn-understood'),
+        header: document.getElementById('header'),
+        app: document.getElementById('app'),
         levelSelect: document.getElementById('level-select'),
         starDisplay: document.getElementById('star-display'),
         moveCount: document.getElementById('move-count'),
@@ -159,10 +161,17 @@
         goalStars: document.getElementById('goal-stars'),
         goalMessage: document.getElementById('goal-message'),
         goalNext: document.getElementById('goal-next'),
-        goalClose: document.getElementById('goal-close'),
+        goalRetry: document.getElementById('goal-retry'),
         errorOverlay: document.getElementById('error-overlay'),
         errorMessage: document.getElementById('error-message'),
-        errorClose: document.getElementById('error-close')
+        errorClose: document.getElementById('error-close'),
+        completeOverlay: document.getElementById('complete-overlay'),
+        completeStarsTotal: document.getElementById('complete-stars-total'),
+        completeMessage: document.getElementById('complete-message'),
+        completeYes: document.getElementById('complete-yes'),
+        completeNo: document.getElementById('complete-no'),
+        completeThanks: document.getElementById('complete-thanks'),
+        completeQuestion: null // will be set after DOM query
     };
 
     // ───────────────────────────────────────────────
@@ -479,23 +488,43 @@
         const [r, c] = state.ballPos;
         const colDelta = direction === 'SAĞ' ? 1 : -1;
         const newC = c + colDelta;
+        const newR = r - 1; // ileri (yukarı) 1 kare
 
-        // Out of bounds sideways
+        // Adım 1: Yana hareket kontrolü
         if (newC < 0 || newC >= lvl.cols) {
             return `Oops! 😅 Sahanın kenarına geldin, daha fazla yana gidemezsin! Diğer tarafa çalım atmayı dene.`;
         }
 
-        // Check target cell for defender
         if (lvl.defenders.some(d => d[0] === r && d[1] === newC)) {
-            return `Çarpışma! 💥 O tarafta da savunmacı var! Diğer yöne çalım atmayı dene.`;
+            return `Çarpışma! 💥 O tarafta savunmacı var! Diğer yöne çalım atmayı dene.`;
         }
 
-        // Move sideways only (1 kare sağa veya sola)
+        // Adım 2: İleri hareket kontrolü
+        if (newR < 0) {
+            return `Oops! 😅 Çalım atarsan sahadan çıkarsın! Başka bir komut dene.`;
+        }
+
+        if (newR === lvl.goal[0] && newC === lvl.goal[1]) {
+            return `Dur bir dakika! 🤚 Kaleye yürüyerek giremezsin! Önce kalenin yakınına gel, sonra ŞUT_ÇEK kullan.`;
+        }
+
+        if (lvl.defenders.some(d => d[0] === newR && d[1] === newC)) {
+            return `Çarpışma! 💥 Çalım attıktan sonra önünde savunmacı var! Başka bir yol dene.`;
+        }
+
+        // Adım 1: Yana git (animasyonlu)
         state.ballPos = [r, newC];
         renderGrid();
         markTrail(r, c);
         animateBall(r, newC);
-        await sleep(300);
+        await sleep(250);
+
+        // Adım 2: İleri git (animasyonlu)
+        state.ballPos = [newR, newC];
+        renderGrid();
+        markTrail(r, newC);
+        animateBall(newR, newC);
+        await sleep(250);
 
         return null;
     }
@@ -505,29 +534,15 @@
         const [br, bc] = state.ballPos;
         const [gr, gc] = lvl.goal;
 
-        // Şut her zaman ileri (yukarı) gider — topu animasyonla uçuralım
-        // Top aynı sütunda kalır, engele veya saha dışına kadar gider
+        // Şut en fazla 2 kare ileri (yukarı) gider
+        const MAX_SHOT_RANGE = 2;
         let shotR = br;
         let blocksFlown = 0;
         let hitDefender = false;
-        let hitWall = false;
         let scoredGoal = false;
 
-        // Topu adım adım ileri uçur
-        for (let r = br - 1; r >= 0; r--) {
-            // Kaleye ulaştı mı?
-            if (r === gr && bc === gc) {
-                // Animate to goal
-                state.ballPos = [r, bc];
-                renderGrid();
-                markTrail(r + 1, bc);
-                animateBall(r, bc);
-                blocksFlown++;
-                await sleep(150);
-                scoredGoal = true;
-                break;
-            }
-
+        // Topu adım adım ileri uçur (max 2 kare)
+        for (let r = br - 1; r >= 0 && blocksFlown < MAX_SHOT_RANGE; r--) {
             // Defansa çarptı mı?
             if (lvl.defenders.some(d => d[0] === r && d[1] === bc)) {
                 hitDefender = true;
@@ -535,16 +550,15 @@
                 break;
             }
 
-            // Kale satırı ama kale sütunu değil — saha dışı
-            if (r === 0) {
+            // Kaleye ulaştı mı?
+            if (r === gr && bc === gc) {
                 state.ballPos = [r, bc];
                 renderGrid();
                 markTrail(r + 1, bc);
                 animateBall(r, bc);
                 blocksFlown++;
                 await sleep(150);
-                hitWall = true;
-                shotR = r;
+                scoredGoal = true;
                 break;
             }
 
@@ -563,24 +577,21 @@
             return null;
         }
 
-        // Top gitti ama gol olmadı — nereye gittiğini göster
+        // Top gitti ama gol olmadı
         if (hitDefender) {
             return `Şüüüt! 💨 Top ${blocksFlown} kare uçtu ama rakip oyuncuya çarptı! 🛡️ Önce savunmacıyı geçmen lazım.`;
         }
 
-        if (hitWall) {
-            if (bc !== gc) {
-                return `Şüüüt! 💨 Top ${blocksFlown} kare uçtu ama kale yanda kaldı! 🥅 Top kaleyle aynı sütunda olmalı. Çalım atarak hizalanmayı dene!`;
-            }
-            return `Şüüüt! 💨 Top uçtu ama kaleyi bulamadı! Sahanın dışına çıktı.`;
-        }
-
-        // Hiç uçamadı (ball at row 0 already?)
         if (blocksFlown === 0) {
             return `Top zaten sahanın en üstünde! Şut çekecek yer kalmadı.`;
         }
 
-        return `Şüüüt! 💨 Top ${blocksFlown} kare uçtu ama gol olmadı!`;
+        // Menzil dahilinde kaleye ulaşamadı
+        if (bc !== gc) {
+            return `Şüüüt! 💨 Top ${blocksFlown} kare uçtu ama kale yanda kaldı! 🥅 Top kaleyle aynı sütunda olmalı. Çalım atarak hizalanmayı dene!`;
+        }
+
+        return `Şüüüt! 💨 Top ${blocksFlown} kare uçtu ama kaleye ulaşamadı! Şut en fazla 2 kare gider. Kaleye daha fazla yaklaş!`;
     }
 
     function markTrail(row, col) {
@@ -628,6 +639,20 @@
         else msg = `Gooool! ⚽ Ama ${totalCommands} komut kullandın. En az ${optimal} komutla yapılabilir. Daha kısa bir yol bulabilir misin?`;
 
         dom.goalMessage.textContent = msg;
+
+        // Show/hide retry button based on stars
+        if (stars < 3) {
+            dom.goalRetry.classList.remove('hidden');
+        } else {
+            dom.goalRetry.classList.add('hidden');
+        }
+
+        // Son seviyede 'Sonraki Seviye' yerine 'Oyunu Bitir' göster
+        if (state.currentLevel === LEVELS.length - 1) {
+            dom.goalNext.textContent = 'Oyunu Bitir 🏆';
+        } else {
+            dom.goalNext.textContent = 'Sonraki Seviye ➡️';
+        }
 
         // Show result box
         showResult(stars, totalCommands, optimal);
@@ -716,9 +741,30 @@
         if (next < LEVELS.length) {
             loadLevel(next);
         } else {
-            setMessage('🏆', 'Tüm seviyeleri bitirdin! Sen gerçek bir kodlama şampiyonusun! 🎉🎉', 'success');
             dom.goalOverlay.classList.add('hidden');
+            showGameComplete();
         }
+    }
+
+    function showGameComplete() {
+        const totalStars = state.starsEarned.reduce((a, b) => a + b, 0);
+        const maxStars = LEVELS.length * 3;
+
+        let starStr = '';
+        for (let i = 0; i < totalStars; i++) starStr += '⭐';
+
+        dom.completeStarsTotal.textContent = `${starStr}`;
+        dom.completeMessage.textContent = `Toplam ${totalStars} / ${maxStars} yıldız topladın!`;
+
+        // Reset button states
+        dom.completeYes.classList.remove('hidden');
+        dom.completeNo.classList.remove('hidden');
+        dom.completeThanks.classList.add('hidden');
+        const questionEl = dom.completeOverlay.querySelector('.complete-question');
+        if (questionEl) questionEl.classList.remove('hidden');
+
+        dom.completeOverlay.classList.remove('hidden');
+        spawnConfetti();
     }
 
     // ───────────────────────────────────────────────
@@ -732,6 +778,13 @@
     // ───────────────────────────────────────────────
     // 12. EVENT LİSTENER'LAR
     // ───────────────────────────────────────────────
+
+    // Talimat overlay - Anladım butonu
+    dom.btnUnderstood.addEventListener('click', () => {
+        dom.instructionsOverlay.classList.add('hidden');
+        dom.header.classList.remove('hidden');
+        dom.app.classList.remove('hidden');
+    });
 
     // Komut ekleme butonları
     dom.btnIleri.addEventListener('click', () => {
@@ -765,14 +818,30 @@
         dom.goalOverlay.classList.add('hidden');
         nextLevel();
     });
-    dom.goalClose.addEventListener('click', () => {
+    dom.goalRetry.addEventListener('click', () => {
         dom.goalOverlay.classList.add('hidden');
+        resetLevel();
     });
 
     // Hata overlay
     dom.errorClose.addEventListener('click', () => {
         dom.errorOverlay.classList.add('hidden');
         resetLevel();
+    });
+
+    // Oyun bitti overlay
+    dom.completeYes.addEventListener('click', () => {
+        dom.completeOverlay.classList.add('hidden');
+        state.starsEarned = [0, 0, 0, 0, 0, 0, 0];
+        loadLevel(0);
+    });
+
+    dom.completeNo.addEventListener('click', () => {
+        dom.completeYes.classList.add('hidden');
+        dom.completeNo.classList.add('hidden');
+        const questionEl = dom.completeOverlay.querySelector('.complete-question');
+        if (questionEl) questionEl.classList.add('hidden');
+        dom.completeThanks.classList.remove('hidden');
     });
 
     // Klavye kısayolları

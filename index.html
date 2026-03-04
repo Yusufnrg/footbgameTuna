@@ -9,13 +9,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Talimat Overlay -->
+    <div id="instructions-overlay">
+        <div id="instructions-content">
+            <h1 class="instructions-title">⚽ Futbol Algoritma Oyunu</h1>
+            <p class="instructions-subtitle">Komutları sırayla yazarak topu kaleye götür ve GOL at!</p>
+
+            <div class="instructions-section">
+                <h2>🎯 Oyunun Amacı</h2>
+                <p>Sahada bulunan <strong>⚽ topu</strong> komutlar vererek <strong>🥅 kaleye</strong> götürmen gerekiyor. Yolda <strong>🛡️ savunmacılar</strong> olacak, onlara çarpmadan geçmelisin!</p>
+            </div>
+
+            <div class="instructions-commands">
+                <div class="instruction-card card-ileri">
+                    <div class="instruction-card-icon">⬆️</div>
+                    <div class="instruction-card-title">İLERİ_SÜR(x)</div>
+                    <div class="instruction-card-desc">Topu <strong>yukarı doğru x kare</strong> ilerletir. Örneğin <code>İLERİ_SÜR(3)</code> topu 3 kare yukarı taşır. Savunmacıya veya saha dışına çıkarsan hata alırsın!</div>
+                </div>
+
+                <div class="instruction-card card-calim">
+                    <div class="instruction-card-icon">🔀</div>
+                    <div class="instruction-card-title">ÇALIM_AT(yön)</div>
+                    <div class="instruction-card-desc">Topu önce <strong>seçilen yöne 1 kare</strong> kaydırır, ardından <strong>1 kare ileri</strong> götürür. Yani çapraz ilerler! Savunmacıları geçmek için kullan! Örneğin <code>ÇALIM_AT(SAĞ)</code> → sağa + ileri</div>
+                </div>
+
+                <div class="instruction-card card-sut">
+                    <div class="instruction-card-icon">🥅</div>
+                    <div class="instruction-card-title">ŞUT_ÇEK</div>
+                    <div class="instruction-card-desc">Top bulunduğu yerden <strong>en fazla 2 kare yukarı uçar</strong>. Yani kalenin <strong>en fazla 2 satır altında</strong> ve <strong>aynı sütunda</strong> olmalısın. Önünde savunmacı yoksa <strong>GOL</strong> olur! ⚽🎉</div>
+                </div>
+            </div>
+
+            <div class="instructions-section">
+                <h2>💡 İpuçları</h2>
+                <ul class="instructions-tips">
+                    <li>🔢 Komutlar <strong>sırayla</strong> çalışır, yukarıdan aşağıya doğru</li>
+                    <li>⭐ Ne kadar az komut kullanırsan o kadar çok yıldız kazanırsın</li>
+                    <li>🛡️ Savunmacılara çarparsan top durur, yeniden dene</li>
+                    <li>🥅 Şut en fazla <strong>2 kare</strong> uçar! Kaleye yaklaşmadan şut çekme</li>
+                    <li>🔄 Hata yaparsan "Sıfırla" butonu ile baştan başlayabilirsin</li>
+                    <li>📝 Komutları sürükleyerek sırasını değiştirebilirsin</li>
+                </ul>
+            </div>
+
+            <div class="instructions-section">
+                <h2>🎮 Örnek Oynanış</h2>
+                <div class="instructions-example">
+                    <div class="example-step">1️⃣ <code>İLERİ_SÜR(2)</code> → Top 2 kare ileri gider</div>
+                    <div class="example-step">2️⃣ <code>ÇALIM_AT(SAĞ)</code> → Top 1 sağa + 1 ileri gider (çapraz)</div>
+                    <div class="example-step">3️⃣ <code>İLERİ_SÜR(1)</code> → Top 1 kare daha ileri</div>
+                    <div class="example-step">4️⃣ <code>ŞUT_ÇEK</code> → Top uçar ve GOOOL! ⚽</div>
+                </div>
+            </div>
+
+            <button id="btn-understood" class="btn-understood">
+                ✅ Anladım, Oyuna Başla!
+            </button>
+        </div>
+    </div>
+
     <!-- Başlık -->
-    <header id="header">
+    <header id="header" class="hidden">
         <h1>⚽ Futbol Algoritma Oyunu</h1>
         <p class="subtitle">Komutları sırayla yaz, topu kaleye götür ve GOL at! ⚽🎉</p>
     </header>
 
-    <main id="app">
+    <main id="app" class="hidden">
         <!-- Sol Panel: Oyun Alanı -->
         <section id="game-area">
             <!-- Seviye Seçici & Bilgi -->
@@ -60,7 +119,7 @@
                 </div>
 
                 <div class="cmd-group">
-                    <button class="cmd-btn cmd-calim" id="btn-calim" title="Sağa veya sola 1 kare git">
+                    <button class="cmd-btn cmd-calim" id="btn-calim" title="Yana 1 kare + ileri 1 kare git">
                         <span class="cmd-icon">🔀</span>
                         <span class="cmd-label">ÇALIM_AT</span>
                     </button>
@@ -74,7 +133,7 @@
                 </div>
 
                 <div class="cmd-group">
-                    <button class="cmd-btn cmd-sut" id="btn-sut" title="Kalenin tam önünden şut çek!">
+                    <button class="cmd-btn cmd-sut" id="btn-sut" title="En fazla 2 kare ileri şut çek!">
                         <span class="cmd-icon">🥅</span>
                         <span class="cmd-label">ŞUT_ÇEK</span>
                     </button>
@@ -116,8 +175,10 @@
             <div class="goal-text">⚽ GOOOL! ⚽</div>
             <div id="goal-stars"></div>
             <div id="goal-message"></div>
-            <button id="goal-next" class="ctrl-btn run-btn">Sonraki Seviye ➡️</button>
-            <button id="goal-close" class="ctrl-btn reset-btn">Kapat</button>
+            <div class="goal-buttons">
+                <button id="goal-next" class="ctrl-btn run-btn">Sonraki Seviye ➡️</button>
+                <button id="goal-retry" class="ctrl-btn reset-btn">Yeniden Dene 🔄</button>
+            </div>
         </div>
     </div>
 
@@ -127,6 +188,25 @@
             <div class="error-text">😕 Hay aksi!</div>
             <div id="error-message"></div>
             <button id="error-close" class="ctrl-btn reset-btn">Tamam, tekrar deneyeceğim! 💪</button>
+        </div>
+    </div>
+
+    <!-- Oyun Bittiğinde Overlay -->
+    <div id="complete-overlay" class="hidden">
+        <div id="complete-content">
+            <div class="complete-trophy">🏆</div>
+            <div class="complete-title">Tebrikler!</div>
+            <div class="complete-subtitle">Oyunu Bitirdin! 🎉🎉</div>
+            <div id="complete-stars-total"></div>
+            <div id="complete-message"></div>
+            <div class="complete-question">Tekrar denemek ister misin?</div>
+            <div class="goal-buttons">
+                <button id="complete-yes" class="ctrl-btn run-btn">Evet, Baştan! 🔄</button>
+                <button id="complete-no" class="ctrl-btn reset-btn">Hayır, Teşekkürler 👋</button>
+            </div>
+            <div id="complete-thanks" class="hidden">
+                <p class="thanks-text">⚽ Oynadığınız için teşekkürler! ⚽</p>
+            </div>
         </div>
     </div>
 
